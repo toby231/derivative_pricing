@@ -15,7 +15,7 @@ class Option:
     K: float = 100.0 # Strike Price 
     r: float = 0.05 # Risk-free rate
     T: float = 1.0 # Time to maturity in years
-    n: int = 10 # Number of steps
+    n: int = 1 # Number of steps
     sigma: float = 0.05 # Volatility
 
     def __post_init__(self):
