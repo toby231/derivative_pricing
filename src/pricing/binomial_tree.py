@@ -26,9 +26,11 @@ def onestep(opt=Option, option_class = "call"):
     delta = delta_hedge(f_u,f_d,opt)
     return f, delta
 
-def multistep(opt = Option, option_class = "call"):
+def multistep(opt = Option, option_class = "call",option_type = "European"):
     if option_class not in ("call","put"):
         raise ValueError(f"Invalid option class. Must be 'call' or 'put'.")
+    if option_type not in ("European","American"):
+        raise ValueError(f"Invalid option type. Must be 'American' or 'European'.")
 
     j = np.arange(opt.n + 1)
     S_T = opt.S_0 * opt.u**j * opt.d**(opt.n - j)
@@ -43,6 +45,13 @@ def multistep(opt = Option, option_class = "call"):
 
     for step in range(opt.n,0,-1):
         values = discount * (p * values[1:] + (1-p)*values[:-1])
+        if option_type == "American":
+            j = np.arange(step)
+            S = opt.S_0 * opt.u**j * opt.d**(step - 1 - j)
+
+            continuation = values
+            intrinsic = np.maximum(S - opt.K, 0) if option_class == "call" else np.maximum(opt.K - S, 0)
+            values = np.maximum(continuation, intrinsic)
 
     return values[0]
         
