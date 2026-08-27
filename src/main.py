@@ -16,8 +16,9 @@ def main():
 
     # Calculate price using one of many functions
 
-    price = onestep(option)
-    print(f"Calculated Option Price: {price:.2f}")
+    price, delta = onestep(option)
+    print(f"Calculated Option Price: {price:.2f}. Delta ratio: {delta:.2f}")
+
     return 
 
 if __name__ == "__main__":

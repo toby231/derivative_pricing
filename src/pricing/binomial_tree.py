@@ -1,6 +1,7 @@
 import numpy as np
 
-from utils.option_properties import Option
+from src.utils.option_properties import Option
+from src.utils.greeks import delta_hedge
 
 # Start off with one step binomial tree
 
@@ -22,5 +23,26 @@ def onestep(opt=Option, option_class = "call"):
     p = (np.exp(opt.r * opt.T) - opt.d) / (opt.u - opt.d)
 
     f = np.exp(-opt.r * opt.T) * (p * f_u + (1-p) * f_d)
+    delta = delta_hedge(f_u,f_d,opt)
+    return f, delta
 
-    return f
+def multistep(opt = Option, option_class = "call"):
+    if option_class not in ("call","put"):
+        raise ValueError(f"Invalid option class. Must be 'call' or 'put'.")
+
+    j = np.arange(opt.n + 1)
+    S_T = opt.S_0 * opt.u**j * opt.d**(opt.n - j)
+
+    if option_class == "call":
+        values = np.maximum(S_T - opt.K, 0)
+    else:
+        values = np.maximum(opt.K - S_T, 0)
+
+    discount = np.exp(-opt.r * opt.T/opt.n)
+    p = (np.exp(opt.r * opt.T / opt.n) - opt.d) / (opt.u - opt.d)
+
+    for step in range(opt.n,0,-1):
+        values = discount * (p * values[1:] + (1-p)*values[:-1])
+
+    return values[0]
+        
